@@ -48,7 +48,7 @@ export async function generateMetadata() {
 	}
 
 	return {
-		metadataBase: new URL(settings?.metaDomain || meta.url),
+		metadataBase: new URL(settings?.serveUploadsFrom || meta.url),
 		title: {
 			default: settings?.serviceName ?? meta.name,
 			template: `%s - ${settings?.serviceName ?? meta.name}`
@@ -72,13 +72,13 @@ export async function generateMetadata() {
 			title: settings?.serviceName ?? meta.name,
 			description: settings?.metaDescription ?? meta.description,
 			siteName: settings?.serviceName ?? meta.name,
-			images: [`/meta.jpg`]
+			images: [`/og`]
 		},
 		twitter: {
 			card: 'summary_large_image',
 			title: settings?.serviceName ?? meta.name,
 			description: settings?.metaDescription ?? meta.description,
-			images: [`/meta.jpg`],
+			images: [`/og`],
 			creator: settings?.metaTwitterHandle ?? '@twitter'
 		},
 		icons: {
