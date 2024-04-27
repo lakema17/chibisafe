@@ -2,15 +2,24 @@ version: "3.7"
 
 services:
   chibisafe:
-    image: chibisafe/chibisafe:latest
+    # image: chibisafe/chibisafe:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     environment:
       - BASE_API_URL=http://chibisafe_server:8000
+      - BASE_PATH=/chibisafe
     expose:
       - 8001
     restart: unless-stopped
 
   chibisafe_server:
-    image: chibisafe/chibisafe-server:latest
+    # image: chibisafe/chibisafe-server:latest
+    build:
+      context: .
+      dockerfile: docker/DockerfileServer
+    environment:
+      - BASE_API_PATH=/chibisafe
     volumes:
       - ./database:/app/database:rw
       - ./uploads:/app/uploads:rw

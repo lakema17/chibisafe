@@ -18,6 +18,8 @@ import { startUpdateCheckSchedule } from './utils/UpdateCheck.js';
 import { createAdminUserIfNotExists, VERSION } from './utils/Util.js';
 import { fileWatcher, getFileWatcher } from './utils/Watcher.js';
 
+const BASE_API_PATH = process.env.BASE_API_PATH ?? '';
+
 // Create the Fastify server
 const server = fastify({
 	trustProxy: true,
@@ -71,7 +73,7 @@ const start = async () => {
 	// Create the OpenAPI documentation
 	await server.register(import('@fastify/swagger'), { ...Docs, transform: jsonSchemaTransform });
 	await server.register(import('@scalar/fastify-api-reference'), {
-		routePrefix: '/docs',
+		routePrefix: BASE_API_PATH + '/docs',
 		configuration: {
 			spec: {
 				content: () => server.swagger()
@@ -100,7 +102,7 @@ const start = async () => {
 
 	server.addHook('onResponse', (request, reply, done) => {
 		if (
-			!['/thumbs/', '/assets/'].some(path => request.url.startsWith(path)) ||
+			!['/thumbs/', '/assets/'].some(path => request.url.startsWith(BASE_API_PATH + path)) ||
 			process.env.NODE_ENV !== 'production'
 		) {
 			server.log.info({
@@ -170,10 +172,15 @@ const start = async () => {
 
 	// Creating an scoped server instance to pass to the routes in
 	// order to limit the rate-limit plugin to only the routes.
-	await server.register(async instance => {
-		// Scan and load routes into fastify
-		await Routes.load(instance);
-	});
+	await server.register(
+		async instance => {
+			// Scan and load routes into fastify
+			await Routes.load(instance);
+		},
+		{
+			prefix: BASE_API_PATH
+		}
+	);
 
 	if (process.env.NODE_ENV === 'production') {
 		server.addHook('onRequest', (req, _, next) => {

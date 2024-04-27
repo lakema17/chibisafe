@@ -14,6 +14,7 @@ const withMDX = createMDX({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+	basePath: '/chibisafe',
 	reactStrictMode: true,
 	output: 'standalone',
 	pageExtensions: ['mdx', 'ts', 'tsx'],
