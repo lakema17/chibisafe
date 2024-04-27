@@ -37,4 +37,5 @@ services:
       - 24424:80
     environment:
       - BASE_URL=":80"
+      - BASE_PATH=/chibisafe
     restart: unless-stopped
