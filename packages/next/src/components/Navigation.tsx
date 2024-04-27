@@ -32,13 +32,12 @@ export function Navigation({
 				>
 					Dashboard
 				</Link>
-				<a
+				<Link
 					href="/docs"
-					rel="noopener noreferrer"
 					className="flex items-center text-lg font-medium transition-colors hover:text-foreground/80 sm:text-sm text-foreground/60"
 				>
 					Docs
-				</a>
+				</Link>
 				<Link
 					href="/guides"
 					className={cn(
