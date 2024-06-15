@@ -65,7 +65,7 @@ services:
 
 Now that your `docker-compose.yml` file is set up it's now time to create the `Caddyfile` to finish the configuration process:
 
-```
+```Caddyfile
 # chibisafe/Caddyfile
 {$BASE_URL} {
 	route {
@@ -119,7 +119,7 @@ In order to attach a domain name to an application running with an exposed port 
 
 Once you have Caddy installed locally you can add this to your Caddyfile in order reverse proxy the exposed port from chibisafe:
 
-```
+```Caddyfile
 # /etc/caddy/Caddyfile
 your-chibisafe-domain.com {
 	tls internal
@@ -129,7 +129,7 @@ your-chibisafe-domain.com {
 
 If you are a CloudFlare user and want your instance to be proxied by them, you should instead use the one below since it adds the necessary headers to pass the visitor's IP to the chibisafe instance.
 
-```
+```Caddyfile
 # /etc/caddy/Caddyfile
 your-chibisafe-domain.com {
 	tls internal
