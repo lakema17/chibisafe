@@ -97,7 +97,10 @@ export const deleteFiles = async ({
 				Bucket: SETTINGS.S3Bucket,
 				Delete: {
 					Objects: s3Files.map(file => ({
-						Key: file.quarantine ? `quarantine/${file.quarantineFile?.name}` ?? file.name : file.name
+						Key:
+							file.quarantine && file.quarantineFile
+								? `quarantine/${file.quarantineFile.name}`
+								: file.name
 					})),
 					Quiet: true
 				}
@@ -338,6 +341,7 @@ export const storeFileToDb = async (
 		size: file.size,
 		hash: file.hash,
 		ip: file.ip,
+		sourceUrl: file.sourceUrl ?? null,
 		isS3: file.isS3,
 		isWatched: file.isWatched,
 		createdAt: now,
@@ -484,7 +488,7 @@ export const handleUploadFile = async ({
 }: {
 	album?: number | null | undefined;
 	ip: string;
-	upload: { name: string; path: string; size: string; type: string };
+	upload: { name: string; path: string; size: string; sourceUrl?: string; type: string };
 	user?: RequestUser | User | undefined;
 }) => {
 	// Assign a unique identifier to the file
@@ -511,6 +515,7 @@ export const handleUploadFile = async ({
 		size: upload.size,
 		hash: await hashFile(upload.path),
 		ip,
+		sourceUrl: upload.sourceUrl,
 		isS3: false,
 		isWatched: false
 	};
@@ -518,9 +523,14 @@ export const handleUploadFile = async ({
 	let uploadedFile;
 	const fileOnDb = await checkFileHashOnDB(user, file);
 	if (fileOnDb?.repeated) {
-		log.info(
-			`> Tried uploading ${file.original} but already exists on database with identifier: ${fileOnDb.file.name}`
-		);
+		if (SETTINGS.saveDuplicatesToAlbum && album) {
+			await saveFileToAlbum(album, fileOnDb.file.id);
+		} else {
+			log.info(
+				`> Tried uploading ${file.original} but already exists on database with identifier: ${fileOnDb.file.name}. Consider enabling "Add duplicates to Album"`
+			);
+		}
+
 		uploadedFile = fileOnDb.file;
 		await deleteTmpFile(upload.path);
 	} else {

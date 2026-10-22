@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidateTag } from 'next/cache';
+import { updateTag } from 'next/cache';
 import { MessageType } from '@/types';
 import request from '@/lib/request';
 import { getToken } from './utils';
@@ -13,6 +13,7 @@ export const updateAlbumSettings = async (_: any, form: FormData) => {
 
 	const description = form.get('description') as string;
 	const nsfw = form.get('nsfw') === 'on';
+	const sortOrder = (form.get('sortOrder') as string) || null;
 
 	try {
 		const { error } = await request.post({
@@ -20,16 +21,17 @@ export const updateAlbumSettings = async (_: any, form: FormData) => {
 			body: {
 				name,
 				description,
-				nsfw
+				nsfw,
+				sortOrder
 			},
 			headers: {
-				authorization: `Bearer ${getToken()}`
+				authorization: `Bearer ${await getToken()}`
 			}
 		});
 
 		if (error) return { message: error, type: MessageType.Error };
 
-		revalidateTag('albums');
+		updateTag('albums');
 		return { message: 'Album updated', type: MessageType.Success };
 	} catch (error: any) {
 		return { message: error, type: MessageType.Error };

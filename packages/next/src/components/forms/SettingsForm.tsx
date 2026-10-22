@@ -51,6 +51,7 @@ const formSchema = z.object({
 	generateOriginalFileNameWithIdentifier: z.boolean().optional(),
 	enableMixedCaseFilenames: z.boolean().optional(),
 	generatedFilenameLength: z.coerce.number(),
+	saveDuplicatesToAlbum: z.boolean().optional(),
 	blockedExtensions: z.string().optional(),
 	blockNoExtension: z.boolean().optional(),
 	useNetworkStorage: z.boolean().optional(),
@@ -59,6 +60,7 @@ const formSchema = z.object({
 	S3Bucket: z.string().optional(),
 	S3AccessKey: z.string().optional(),
 	S3SecretKey: z.string().optional(),
+	S3PathStyle: z.boolean().optional(),
 	S3Endpoint: z.string().optional(),
 	S3PublicUrl: z.string().optional(),
 	// Other
@@ -66,6 +68,7 @@ const formSchema = z.object({
 	generatedAlbumLength: z.coerce.number(),
 	generatedLinksLength: z.coerce.number(),
 	useUrlShortener: z.boolean().optional(),
+	defaultSortOrder: z.string().optional(),
 	// Legal
 	privacyPolicyPageContent: z.string().optional(),
 	termsOfServicePageContent: z.string().optional(),
@@ -114,7 +117,7 @@ export const SettingsForm = ({
 		}
 
 		toast.success('Settings saved. Please note that some settings may require a server restart to take effect');
-		saveSettings();
+		await saveSettings();
 		void queryClient.invalidateQueries({ queryKey: ['settings'] });
 	};
 

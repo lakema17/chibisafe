@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, type PropsWithChildren } from 'react';
+import { useEffect, useState, type PropsWithChildren } from 'react';
 import { updateAlbumSettings } from '@/actions/UpdateAlbumSettings';
 import type { AlbumLink } from '@/types';
 import { MessageType } from '@/types';
 import { useAtom, useAtomValue } from 'jotai';
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { toast } from 'sonner';
 
 import { isDialogOpenAtom, selectedAlbumAtom } from '@/lib/atoms/albumSettingsDialog';
@@ -24,6 +24,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { AlbumSettingsDialogActions } from '../AlbumSettingsDialogActions';
 import { AlbumLinksTable } from '../tables/album-links-table/AlbumLinksTable';
@@ -32,14 +33,21 @@ import request from '@/lib/request';
 import { Plus } from 'lucide-react';
 
 export function AlbumSettingsDialog({ children }: PropsWithChildren<{}>) {
+	const defaultSortValue = '_default';
 	const [open, setOpen] = useAtom(isDialogOpenAtom);
 	const album = useAtomValue(selectedAlbumAtom);
 	const queryClient = useQueryClient();
+	const [sortOrder, setSortOrder] = useState<string>('');
 
-	const [state, formAction] = useFormState(updateAlbumSettings, {
+	const [state, formAction] = useActionState(updateAlbumSettings, {
 		message: '',
 		type: MessageType.Uninitialized
 	});
+
+	// Sync sortOrder state when album changes
+	useEffect(() => {
+		setSortOrder(album?.sortOrder ?? '');
+	}, [album?.sortOrder]);
 
 	const createNewAlbumLink = async () => {
 		try {
@@ -137,6 +145,29 @@ export function AlbumSettingsDialog({ children }: PropsWithChildren<{}>) {
 									</p>
 								</div>
 								<Switch id="nsfw" name="nsfw" defaultChecked={album?.nsfw ?? false} />
+							</div>
+							<div>
+								<Label htmlFor="sortOrder">Sort Order</Label>
+								<input type="hidden" name="sortOrder" value={sortOrder} />
+								<Select
+									value={sortOrder === '' ? defaultSortValue : sortOrder}
+									onValueChange={value => setSortOrder(value === defaultSortValue ? '' : value)}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Use default" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value={defaultSortValue}>Use default</SelectItem>
+										<SelectItem value="createdAt:desc">Newest first</SelectItem>
+										<SelectItem value="createdAt:asc">Oldest first</SelectItem>
+										<SelectItem value="name:asc">Name (A-Z)</SelectItem>
+										<SelectItem value="name:desc">Name (Z-A)</SelectItem>
+										<SelectItem value="id:desc">Legacy Default (ID Desc)</SelectItem>
+									</SelectContent>
+								</Select>
+								<p className="text-[0.8rem] text-muted-foreground mt-1">
+									Choose how files are sorted in this album.
+								</p>
 							</div>
 						</form>
 						<div>
